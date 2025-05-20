@@ -55,8 +55,10 @@ class Command(BaseCommand):
                         except ValueError:
                             self.stdout.write(self.style.WARNING(f'Invalid year format: {year_str}'))
                     
+                    org.update_stats()
+                    
                     orgs_count += 1
-                    if orgs_count % 10 == 0:
+                    if orgs_count % 50 == 0:
                         self.stdout.write(self.style.SUCCESS(f'Processed {orgs_count} organizations'))
                         
                 except Exception as e:
