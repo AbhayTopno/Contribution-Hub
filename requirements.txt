@@ -3,3 +3,6 @@ psycopg2-binary==2.9.10
 requests==2.32.3        
 python-dotenv==1.1.0    
 strawberry-graphql[django]==0.269.0
+django-cors-headers==4.7.0
+strawberry-django-jwt==0.2.3
+python-jose[cryptography]==3.4.0
