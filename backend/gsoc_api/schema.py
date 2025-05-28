@@ -1,6 +1,7 @@
 import strawberry
 from typing import List, Optional
 from .models import Organization, YearlyParticipation
+from collections import Counter
 
 @strawberry.django.type(YearlyParticipation)
 class YearlyParticipationType:
@@ -62,12 +63,14 @@ class Query:
     def all_tech_stacks(self) -> List[str]:
         techs = Organization.objects.values_list('tech_stack', flat=True)
         flat = [item for sublist in techs if sublist for item in sublist]
-        return sorted(list(set(flat)))
+        counter = Counter(flat)
+        return [tech for tech, _ in counter.most_common()]
 
     @strawberry.field
     def all_topics(self) -> List[str]:
         topics = Organization.objects.values_list('topics', flat=True)
         flat = [item for sublist in topics if sublist for item in sublist]
-        return sorted(list(set(flat)))
+        counter = Counter(flat)
+        return [topic for topic, _ in counter.most_common()]
 
 schema = strawberry.Schema(query=Query)

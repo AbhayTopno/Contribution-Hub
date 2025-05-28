@@ -72,24 +72,6 @@ export default function Navbar({ searchTerm, setSearchTerm }: NavbarProps) {
                 </button>
               )}
             </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-gray-300 bg-slate-100 hover:border-black transition-all duration-300 ease-in-out"
-                >
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem>Open Source</DropdownMenuItem>
-                <DropdownMenuItem>Social Impact</DropdownMenuItem>
-                <DropdownMenuItem>Community</DropdownMenuItem>
-                <DropdownMenuItem>Research</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>

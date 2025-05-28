@@ -2,7 +2,8 @@
 
 import { Inter } from 'next/font/google';
 import Navbar from '@/components/organization/Navbar';
-import FilterBar from '@/components/organization/FilterBar';
+import CategoryFilterBar from '@/components/organization/CategoryFilterBar';
+import SidebarFilter from '@/components/organization/SidebarFilter';
 import LoadingState from '@/components/organization/LoadingState';
 import ErrorState from '@/components/organization/ErrorState';
 import {
@@ -35,10 +36,8 @@ export const OrganizationList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTechStack, setSelectedTechStack] = useState<string | null>(
-    null
-  );
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [selectedTechStack, setSelectedTechStack] = useState<string[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
   // Fetch filter options
   const {
@@ -60,7 +59,7 @@ export const OrganizationList: React.FC = () => {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, selectedTechStack, selectedTopic]);
+  }, [selectedCategory, selectedTechStack, selectedTopics]);
 
   const { loading, error, data } = useQuery<
     OrganizationsData,
@@ -69,8 +68,8 @@ export const OrganizationList: React.FC = () => {
     variables: {
       search: debouncedSearchTerm || undefined,
       category: selectedCategory || undefined,
-      techStack: selectedTechStack ? [selectedTechStack] : undefined,
-      topic: selectedTopic ? [selectedTopic] : undefined,
+      techStack: selectedTechStack.length > 0 ? selectedTechStack : undefined,
+      topic: selectedTopics.length > 0 ? selectedTopics : undefined,
       offset: (currentPage - 1) * pageSize,
       limit: pageSize,
     },
@@ -95,8 +94,8 @@ export const OrganizationList: React.FC = () => {
 
   const handleResetFilters = () => {
     setSelectedCategory(null);
-    setSelectedTechStack(null);
-    setSelectedTopic(null);
+    setSelectedTechStack([]);
+    setSelectedTopics([]);
     setSearchTerm('');
     setDebouncedSearchTerm('');
   };
@@ -104,116 +103,155 @@ export const OrganizationList: React.FC = () => {
   const getFilterDescription = () => {
     const filters = [];
     if (selectedCategory) filters.push(`category "${selectedCategory}"`);
-    if (selectedTechStack) filters.push(`technology "${selectedTechStack}"`);
-    if (selectedTopic) filters.push(`topic "${selectedTopic}"`);
+    if (selectedTechStack.length > 0)
+      filters.push(`${selectedTechStack.length} technology/technologies`);
+    if (selectedTopics.length > 0)
+      filters.push(`${selectedTopics.length} topic(s)`);
     if (debouncedSearchTerm) filters.push(`search "${debouncedSearchTerm}"`);
 
     return filters.length > 0 ? ` with ${filters.join(', ')}` : '';
   };
 
+  const hasActiveFilters =
+    selectedCategory ||
+    selectedTechStack.length > 0 ||
+    selectedTopics.length > 0;
+
   // Show error if filter options failed to load
   if (filterOptionsError) {
     return (
-      <div className={`min-h-screen bg-white text-black ${inter.className}`}>
-        <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ErrorState error={filterOptionsError} />
-        </main>
+      <div
+        className={`min-h-screen bg-white text-black ${inter.className} overflow-hidden`}
+      >
+        <div className="h-screen flex flex-col">
+          <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <ErrorState error={filterOptionsError} />
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen bg-white text-black ${inter.className}`}>
-      <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <FilterBar
-        categories={filterOptionsData?.allCategories || []}
-        techStacks={filterOptionsData?.allTechStacks || []}
-        topics={filterOptionsData?.allTopics || []}
-        selectedCategory={selectedCategory}
-        selectedTechStack={selectedTechStack}
-        selectedTopic={selectedTopic}
-        onSelectCategory={setSelectedCategory}
-        onSelectTechStack={setSelectedTechStack}
-        onSelectTopic={setSelectedTopic}
-        onResetFilters={handleResetFilters}
+    <div
+      className={`min-h-screen bg-white text-black ${inter.className} relative overflow-hidden`}
+    >
+      {/* Left Sidebar - Tech Stack */}
+      <SidebarFilter
+        title="Tech Stack"
+        items={filterOptionsData?.allTechStacks || []}
+        selectedItems={selectedTechStack}
+        onSelectItems={setSelectedTechStack}
+        side="left"
         loading={filterOptionsLoading}
       />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {loading && <LoadingState />}
-        {error && <ErrorState error={error} />}
-        {data && (
-          <>
-            {(debouncedSearchTerm ||
-              selectedCategory ||
-              selectedTechStack ||
-              selectedTopic) && (
-              <div className="mb-6">
-                <p className="text-gray-600">
-                  {data.organizations.length > 0
-                    ? `Found ${data.organizations.length} organization${
-                        data.organizations.length === 1 ? '' : 's'
-                      }${getFilterDescription()}`
-                    : `No organizations found${getFilterDescription()}`}
-                </p>
+
+      {/* Right Sidebar - Topics */}
+      <SidebarFilter
+        title="Topics"
+        items={filterOptionsData?.allTopics || []}
+        selectedItems={selectedTopics}
+        onSelectItems={setSelectedTopics}
+        side="right"
+        loading={filterOptionsLoading}
+      />
+
+      {/* Main Content - Fixed Height with Internal Scrolling */}
+      <div className="h-screen flex flex-col px-4">
+        <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <CategoryFilterBar
+          categories={filterOptionsData?.allCategories || []}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          onResetFilters={handleResetFilters}
+          hasActiveFilters={hasActiveFilters}
+          loading={filterOptionsLoading}
+        />
+        {/* Make this area scrollable and fill the rest of the screen */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {loading && <LoadingState />}
+            {error && <ErrorState error={error} />}
+            {data && (
+              <div>
+                {(debouncedSearchTerm ||
+                  selectedCategory ||
+                  selectedTechStack.length > 0 ||
+                  selectedTopics.length > 0) && (
+                  <div className="mb-6">
+                    <p className="text-gray-600">
+                      {data.organizations.length > 0
+                        ? `Found ${data.organizations.length} organization${
+                            data.organizations.length === 1 ? '' : 's'
+                          }${getFilterDescription()}`
+                        : `No organizations found${getFilterDescription()}`}
+                    </p>
+                  </div>
+                )}
+                <OrganizationGrid organizations={data.organizations} />
+                {data.organizations.length === 0 &&
+                  !debouncedSearchTerm &&
+                  !selectedCategory &&
+                  selectedTechStack.length === 0 &&
+                  selectedTopics.length === 0 && (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 text-lg">
+                        No organizations found
+                      </p>
+                    </div>
+                  )}
+                {data.organizations.length > 0 &&
+                  (hasPrevPage || hasNextPage) && (
+                    <div className="mt-8 flex justify-center pb-8">
+                      <Pagination>
+                        <PaginationContent>
+                          {hasPrevPage && (
+                            <PaginationItem>
+                              <PaginationPrevious
+                                onClick={() =>
+                                  setCurrentPage((prev) =>
+                                    Math.max(1, prev - 1)
+                                  )
+                                }
+                                className="cursor-pointer text-black hover:bg-black hover:text-white"
+                              />
+                            </PaginationItem>
+                          )}
+                          {getPageNumbers().map((pageNum) => (
+                            <PaginationItem key={pageNum}>
+                              <PaginationLink
+                                onClick={() => setCurrentPage(pageNum)}
+                                isActive={currentPage === pageNum}
+                                className={`cursor-pointer ${
+                                  currentPage === pageNum
+                                    ? 'bg-black text-white'
+                                    : 'text-black'
+                                }`}
+                              >
+                                {pageNum}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          {hasNextPage && (
+                            <PaginationItem>
+                              <PaginationNext
+                                onClick={() =>
+                                  setCurrentPage((prev) => prev + 1)
+                                }
+                                className="cursor-pointer text-black hover:bg-black hover:text-white"
+                              />
+                            </PaginationItem>
+                          )}
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
               </div>
             )}
-            <OrganizationGrid organizations={data.organizations} />
-            {data.organizations.length === 0 &&
-              !debouncedSearchTerm &&
-              !selectedCategory &&
-              !selectedTechStack &&
-              !selectedTopic && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg">
-                    No organizations found
-                  </p>
-                </div>
-              )}
-            {data.organizations.length > 0 && (hasPrevPage || hasNextPage) && (
-              <div className="mt-8 flex justify-center">
-                <Pagination>
-                  <PaginationContent>
-                    {hasPrevPage && (
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() =>
-                            setCurrentPage((prev) => Math.max(1, prev - 1))
-                          }
-                          className="cursor-pointer text-black hover:bg-black hover:text-white"
-                        />
-                      </PaginationItem>
-                    )}
-                    {getPageNumbers().map((pageNum) => (
-                      <PaginationItem key={pageNum}>
-                        <PaginationLink
-                          onClick={() => setCurrentPage(pageNum)}
-                          isActive={currentPage === pageNum}
-                          className={`cursor-pointer ${
-                            currentPage === pageNum
-                              ? 'bg-black text-white '
-                              : 'text-black'
-                          }`}
-                        >
-                          {pageNum}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    {hasNextPage && (
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() => setCurrentPage((prev) => prev + 1)}
-                          className="cursor-pointer text-black hover:bg-black hover:text-white"
-                        />
-                      </PaginationItem>
-                    )}
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
-          </>
-        )}
-      </main>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
