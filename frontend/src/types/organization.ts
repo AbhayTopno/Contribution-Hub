@@ -17,9 +17,32 @@ export interface Organization {
 }
 
 export interface OrganizationsQueryVariables {
+  search?: string;
   category?: string;
   techStack?: string[];
   topic?: string[];
   offset?: number;
   limit?: number;
+}
+
+export interface OrganizationsData {
+  organizations: Organization[];
+}
+
+export interface CategoriesData {
+  allCategories: string[];
+}
+
+export interface TechStacksData {
+  allTechStacks: string[];
+}
+
+export interface TopicsData {
+  allTopics: string[];
+}
+
+export interface FilterOptionsData {
+  allCategories: string[];
+  allTechStacks: string[];
+  allTopics: string[];
 }

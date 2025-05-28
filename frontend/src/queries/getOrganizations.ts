@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 
 export const GET_ORGANIZATIONS = gql`
   query GetOrganizations(
+    $search: String
     $category: String
     $techStack: [String!]
     $topic: [String!]
@@ -9,6 +10,7 @@ export const GET_ORGANIZATIONS = gql`
     $limit: Int
   ) {
     organizations(
+      search: $search
       category: $category
       techStack: $techStack
       topic: $topic
@@ -29,5 +31,31 @@ export const GET_ORGANIZATIONS = gql`
         projectCount
       }
     }
+  }
+`;
+
+export const GET_ALL_CATEGORIES = gql`
+  query GetAllCategories {
+    allCategories
+  }
+`;
+
+export const GET_ALL_TECH_STACKS = gql`
+  query GetAllTechStacks {
+    allTechStacks
+  }
+`;
+
+export const GET_ALL_TOPICS = gql`
+  query GetAllTopics {
+    allTopics
+  }
+`;
+
+export const GET_FILTER_OPTIONS = gql`
+  query GetFilterOptions {
+    allCategories
+    allTechStacks
+    allTopics
   }
 `;

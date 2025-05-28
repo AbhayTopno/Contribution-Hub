@@ -18,7 +18,7 @@ class OrganizationType:
     tech_stack: Optional[List[str]]
     rating: float
     total_projects: int
-    
+
     @strawberry.field
     def yearly_participations(self) -> List[YearlyParticipationType]:
         return self.yearly_participations.all().order_by('-year')
@@ -27,6 +27,8 @@ class OrganizationType:
 class Query:
     @strawberry.field
     def organizations(
+        self,
+        search: Optional[str] = None,
         category: Optional[str] = None,
         tech_stack: Optional[List[str]] = None,
         topic: Optional[List[str]] = None,
@@ -34,23 +36,38 @@ class Query:
         limit: int = 10
     ) -> List[OrganizationType]:
         queryset = Organization.objects.prefetch_related('yearly_participations')
-        
+
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+
         if category:
             queryset = queryset.filter(category__iexact=category)
-        
+
         if tech_stack:
             for tech in tech_stack:
                 queryset = queryset.filter(tech_stack__contains=[tech])
-        
+
         if topic:
             for t in topic:
                 queryset = queryset.filter(topics__contains=[t])
-            
-        queryset = queryset.order_by(
-            '-rating',        
-            '-total_projects'   
-        )[offset:offset + limit]
-        
+
+        queryset = queryset.order_by('-rating', '-total_projects')[offset:offset + limit]
         return queryset
+
+    @strawberry.field
+    def all_categories(self) -> List[str]:
+        return list(Organization.objects.exclude(category__isnull=True).values_list('category', flat=True).distinct())
+
+    @strawberry.field
+    def all_tech_stacks(self) -> List[str]:
+        techs = Organization.objects.values_list('tech_stack', flat=True)
+        flat = [item for sublist in techs if sublist for item in sublist]
+        return sorted(list(set(flat)))
+
+    @strawberry.field
+    def all_topics(self) -> List[str]:
+        topics = Organization.objects.values_list('topics', flat=True)
+        flat = [item for sublist in topics if sublist for item in sublist]
+        return sorted(list(set(flat)))
 
 schema = strawberry.Schema(query=Query)
