@@ -1,15 +1,8 @@
 'use client';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import type React from 'react';
 import { JetBrains_Mono } from 'next/font/google';
-import { Search, Filter } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
 
@@ -28,7 +21,7 @@ export default function Navbar({ searchTerm, setSearchTerm }: NavbarProps) {
   };
 
   return (
-    <nav className="border-b border-gray-200 bg-white/50 backdrop-blur-md sticky top-0 z-50">
+    <nav className="border-b border-gray-200 bg-white/30 backdrop-blur-md fixed top-0 z-50 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Title */}

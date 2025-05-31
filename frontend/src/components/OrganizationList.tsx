@@ -158,18 +158,19 @@ export const OrganizationList: React.FC = () => {
       />
 
       {/* Main Content - Fixed Height with Internal Scrolling */}
-      <div className="h-screen flex flex-col px-4">
+      <div className="flex flex-col px-4">
         <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <CategoryFilterBar
-          categories={filterOptionsData?.allCategories || []}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-          onResetFilters={handleResetFilters}
-          hasActiveFilters={hasActiveFilters}
-          loading={filterOptionsLoading}
-        />
+
         {/* Make this area scrollable and fill the rest of the screen */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto mt-[64px]">
+          <CategoryFilterBar
+            categories={filterOptionsData?.allCategories || []}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            onResetFilters={handleResetFilters}
+            hasActiveFilters={hasActiveFilters}
+            loading={filterOptionsLoading}
+          />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {loading && <LoadingState />}
             {error && <ErrorState error={error} />}

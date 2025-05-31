@@ -27,6 +27,13 @@ class OrganizationType:
 @strawberry.type
 class Query:
     @strawberry.field
+    def organization(self, name: str) -> Optional[OrganizationType]:
+        try:
+            return Organization.objects.prefetch_related('yearly_participations').get(name=name)
+        except Organization.DoesNotExist:
+            return None
+
+    @strawberry.field
     def organizations(
         self,
         search: Optional[str] = None,

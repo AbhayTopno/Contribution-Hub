@@ -59,3 +59,23 @@ export const GET_FILTER_OPTIONS = gql`
     allTopics
   }
 `;
+
+export const GET_ORGANIZATION = gql`
+  query GetOrganization($name: String!) {
+    organization(name: $name) {
+      name
+      description
+      url
+      imageUrl
+      category
+      topics
+      techStack
+      rating
+      totalProjects
+      yearlyParticipations {
+        year
+        projectCount
+      }
+    }
+  }
+`;

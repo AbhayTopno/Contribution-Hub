@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class GsocApiConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'gsoc_api'
+    name = 'api.gsoc_api'

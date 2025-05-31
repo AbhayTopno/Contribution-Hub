@@ -23,7 +23,7 @@ export default function FilterGrid({
   const safeSelectedItems = selectedItems || [];
 
   return (
-    <div className="grid grid-cols-3 gap-x-6 gap-y-3">
+    <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-x-6 gap-y-3">
       {items.map((item) => (
         <label
           key={item}
