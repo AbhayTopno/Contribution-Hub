@@ -49,7 +49,7 @@ export default function OrganizationPage() {
 
   const totalYears = organization.yearlyParticipations.length;
   const avgProjectsPerYear =
-    totalYears > 0 ? Math.round(organization.totalProjects / totalYears) : 0;
+    totalYears > 0 ? (organization.totalProjects / totalYears).toFixed(1) : 0;
 
   const chartData = organization.yearlyParticipations
     .slice()

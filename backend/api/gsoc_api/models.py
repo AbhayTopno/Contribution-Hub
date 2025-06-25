@@ -10,6 +10,8 @@ class Organization(models.Model):
     category = models.CharField(max_length=100, blank=True, null=True)
     topics = ArrayField(models.CharField(max_length=100), blank=True, null=True)
     tech_stack = ArrayField(models.CharField(max_length=100), blank=True, null=True)
+    github_url = models.URLField(max_length=255, blank=True, null=True)
+
     rating = models.FloatField(default=0.0)
     total_projects = models.IntegerField(default=0)
     

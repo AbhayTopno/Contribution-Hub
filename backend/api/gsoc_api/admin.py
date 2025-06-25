@@ -8,7 +8,7 @@ class YearlyParticipationInline(admin.TabularInline):
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'url', 'image_url', 'category', 'topics', 
-                    'tech_stack','get_years_participated', 'rating', 'total_projects',)
+                    'tech_stack', 'github_url','get_years_participated', 'rating', 'total_projects',)
     search_fields = ('name', 'category', 'topics', 'tech_stack')
     list_filter = ('category', 'yearly_participations__year')
     inlines = [YearlyParticipationInline]

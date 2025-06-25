@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp } from 'lucide-react';
 import { JetBrains_Mono } from 'next/font/google';
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
@@ -21,7 +20,6 @@ export default function QuickStats({
     <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-slate-600" />
           Quick Stats
         </CardTitle>
       </CardHeader>
