@@ -8,6 +8,7 @@ export interface Organization {
   description?: string | null;
   url?: string | null;
   imageUrl?: string | null;
+  githubUrl?: string | null;
   category?: string | null;
   topics?: string[] | null;
   techStack?: string[] | null;
@@ -45,4 +46,27 @@ export interface FilterOptionsData {
   allCategories: string[];
   allTechStacks: string[];
   allTopics: string[];
+}
+
+export interface GitHubLanguage {
+  name: string;
+  color: string;
+}
+
+export interface GitHubRepo {
+  name: string;
+  description?: string | null;
+  url: string;
+  stars: number;
+  forks: number;
+  lastCommitDate: string;
+  languages: GitHubLanguage[];
+}
+
+export interface GitHubReposData {
+  githubRepos: GitHubRepo[];
+}
+
+export interface GitHubReposQueryVariables {
+  githubUrl: string;
 }

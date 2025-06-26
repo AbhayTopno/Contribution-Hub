@@ -18,6 +18,7 @@ import YearlyBreakdown from '@/components/organization/detail/YearlyBreakdown';
 import SimilarOrganizations from '@/components/organization/detail/SimilarOrganizations';
 import DetailSkeleton from '@/components/organization/detail/DetailSkeleton';
 import NotFound from '@/components/organization/detail/NotFound';
+import BreadcrumbNav from '@/components/common/BreadcrumbNav';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -63,6 +64,7 @@ export default function OrganizationPage() {
     <div
       className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${inter.className}`}
     >
+      <BreadcrumbNav organizationName={organization.name} />
       <div className="max-w-7xl mx-auto p-6">
         <OrganizationHero organization={organization} totalYears={totalYears} />
 

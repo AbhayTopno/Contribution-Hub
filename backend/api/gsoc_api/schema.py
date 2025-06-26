@@ -14,6 +14,7 @@ class OrganizationType:
     description: Optional[str]
     url: Optional[str]
     image_url: Optional[str]
+    github_url: Optional[str]
     category: Optional[str]
     topics: Optional[List[str]]
     tech_stack: Optional[List[str]]

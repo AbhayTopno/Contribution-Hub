@@ -1,9 +1,17 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { JetBrains_Mono } from 'next/font/google';
 import { Badge } from '@/components/ui/badge';
-import { Target, Folder, Calendar, Globe, ExternalLink } from 'lucide-react';
+import {
+  Target,
+  Folder,
+  Calendar,
+  Globe,
+  ExternalLink,
+  Github,
+} from 'lucide-react';
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
 
@@ -14,6 +22,7 @@ interface OrganizationHeroProps {
     category?: string | null;
     totalProjects: number;
     url?: string | null;
+    githubUrl?: string | null;
   };
   totalYears: number;
 }
@@ -63,18 +72,40 @@ export default function OrganizationHero({
             </Badge>
           </div>
 
-          {organization.url && (
-            <a
-              href={organization.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors"
-            >
-              <Globe className="w-4 h-4" />
-              Visit Website
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          )}
+          <div className="flex flex-wrap items-center gap-4">
+            {organization.url && (
+              <a
+                href={organization.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors"
+              >
+                <Globe className="w-4 h-4" />
+                Visit Website
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
+            {organization.githubUrl && (
+              <Link
+                href={`/organization/${encodeURIComponent(
+                  organization.name
+                )}/contribute`}
+                className="group relative inline-flex items-center gap-2 bg-slate-700/50 hover:bg-slate-600/60 backdrop-blur-sm border border-slate-500/30 hover:border-slate-400/50 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl overflow-hidden"
+              >
+                {/* Continuous animated background gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-600/20 via-slate-500/30 to-slate-600/20 animate-pulse"></div>
+
+                {/* Continuous shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 animate-shimmer"></div>
+
+                {/* Continuous glow effect */}
+                <div className="absolute inset-0 rounded-lg bg-slate-400/20 animate-glow"></div>
+
+                <Github className="w-4 h-4 relative z-10 animate-bounce-subtle" />
+                <span className="relative z-10">Contribute</span>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>

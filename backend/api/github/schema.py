@@ -20,8 +20,8 @@ class Repository:
 @strawberry.type
 class Query:
     @strawberry.field
-    def github_repos(self, org_name: str) -> List[Repository]:
-        repos_data = fetch_all_org_repos(org_name)
+    def github_repos(self, github_url: str) -> List[Repository]:
+        repos_data = fetch_all_org_repos(github_url)
         
         repositories = []
         for repo in repos_data:

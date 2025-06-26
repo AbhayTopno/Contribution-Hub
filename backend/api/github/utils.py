@@ -5,11 +5,29 @@ from typing import List, Dict
 from dotenv import load_dotenv
 from functools import lru_cache
 import time
+import re
 
 load_dotenv()
 
 TOKEN = os.getenv("GITHUB_TOKEN")
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
+
+def extract_org_from_github_url(github_url: str) -> str:
+    """Extract organization name from GitHub URL"""
+    # Handle various GitHub URL formats
+    patterns = [
+        r'github\.com/([^/]+)',  # https://github.com/org or http://github.com/org
+        r'github\.com/([^/]+)/',  # https://github.com/org/
+        r'github\.com/([^/]+)/.*',  # https://github.com/org/repo
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, github_url, re.IGNORECASE)
+        if match:
+            return match.group(1)
+    
+    # If no pattern matches, assume it's already an org name
+    return github_url
 
 @lru_cache(maxsize=16)
 def _cached_fetch(org_name: str, cache_key: str) -> List[Dict]:
@@ -92,5 +110,6 @@ def _fetch_repos(org_name: str) -> List[Dict]:
     
     return all_repos
 
-def fetch_all_org_repos(org_name: str) -> List[Dict]:
+def fetch_all_org_repos(github_url_or_org: str) -> List[Dict]:
+    org_name = extract_org_from_github_url(github_url_or_org)
     return _cached_fetch(org_name, _get_cache_key())

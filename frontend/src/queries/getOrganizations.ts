@@ -21,6 +21,7 @@ export const GET_ORGANIZATIONS = gql`
       description
       url
       imageUrl
+      githubUrl
       category
       topics
       techStack
@@ -67,6 +68,7 @@ export const GET_ORGANIZATION = gql`
       description
       url
       imageUrl
+      githubUrl
       category
       topics
       techStack
@@ -75,6 +77,23 @@ export const GET_ORGANIZATION = gql`
       yearlyParticipations {
         year
         projectCount
+      }
+    }
+  }
+`;
+
+export const GET_GITHUB_REPOS = gql`
+  query GetGitHubRepos($githubUrl: String!) {
+    githubRepos(githubUrl: $githubUrl) {
+      name
+      description
+      url
+      stars
+      forks
+      lastCommitDate
+      languages {
+        name
+        color
       }
     }
   }

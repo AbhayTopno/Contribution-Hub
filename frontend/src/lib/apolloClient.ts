@@ -4,3 +4,8 @@ export const client = new ApolloClient({
   uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
   cache: new InMemoryCache(),
 });
+
+export const githubClient = new ApolloClient({
+  uri: process.env.NEXT_PUBLIC_GITHUB_GRAPHQL,
+  cache: new InMemoryCache(),
+});
