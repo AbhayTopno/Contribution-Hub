@@ -11,6 +11,7 @@ import {
   Globe,
   ExternalLink,
   Github,
+  Rocket,
 } from 'lucide-react';
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
@@ -72,7 +73,7 @@ export default function OrganizationHero({
             </Badge>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-12">
             {organization.url && (
               <a
                 href={organization.url}
@@ -82,6 +83,19 @@ export default function OrganizationHero({
               >
                 <Globe className="w-4 h-4" />
                 Visit Website
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
+
+            {organization.githubUrl && (
+              <a
+                href={organization.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors"
+              >
+                <Github className="w-4 h-4" />
+                GitHub
                 <ExternalLink className="w-4 h-4" />
               </a>
             )}
@@ -101,7 +115,7 @@ export default function OrganizationHero({
                 {/* Continuous glow effect */}
                 <div className="absolute inset-0 rounded-lg bg-slate-400/20 animate-glow"></div>
 
-                <Github className="w-4 h-4 relative z-10 animate-bounce-subtle" />
+                <Rocket className="w-4 h-4 relative z-10 animate-bounce-subtle" />
                 <span className="relative z-10">Contribute</span>
               </Link>
             )}

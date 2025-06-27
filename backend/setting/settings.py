@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api.gsoc_api',
     'api.github',
+    'api.repos',
     'corsheaders',
 ]
 
