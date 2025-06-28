@@ -94,6 +94,14 @@ body {
   cursor: url('/icons8-hand-cursor-30.png'), pointer;
 }
 
+.cursor-hero-pointer {
+  cursor: url('/icons8-cursor-hero-20.png'), pointer;
+}
+
+.cursor-hero-hand {
+  cursor: url('/icons8-hand-cursor-hero-30.png'), pointer;
+}
+
 /* Smooth transitions */
 * {
   transition-property: color, background-color, border-color,
@@ -223,5 +231,38 @@ body {
 }
 
 .animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* Contribute button styles */
+.contribute-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.contribute-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: translateX(-100%) skewX(12deg);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.contribute-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(148, 163, 184, 0.2);
+  animation: glow 2s ease-in-out infinite;
+}
+
+.contribute-button .contribute-icon {
   animation: bounce-subtle 2s ease-in-out infinite;
 }

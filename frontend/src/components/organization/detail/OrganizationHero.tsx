@@ -33,7 +33,7 @@ export default function OrganizationHero({
   totalYears,
 }: OrganizationHeroProps) {
   return (
-    <div className="bg-gradient-to-r from-slate-950 via-slate-800 to-slate-950 rounded-2xl p-8 mb-8 shadow-xl">
+    <div className="bg-gradient-to-r from-slate-950 via-slate-800 to-slate-950 rounded-2xl p-8 mb-8 shadow-xl cursor-hero-pointer">
       <div className="flex flex-col lg:flex-row items-start gap-8">
         {organization.imageUrl && (
           <div className="flex-shrink-0">
@@ -58,16 +58,16 @@ export default function OrganizationHero({
 
           <div className="flex flex-wrap gap-3 mb-6">
             {organization.category && (
-              <Badge className="bg-blue-500/20 text-blue-200 border-blue-400/30 hover:bg-blue-500/30 px-4 py-2 text-sm">
+              <Badge className="bg-blue-500/20 text-blue-200 border-blue-400/30 hover:bg-blue-500/30 px-4 py-2 text-sm cursor-hero-hand">
                 <Target className="w-4 h-4 mr-2" />
                 {organization.category}
               </Badge>
             )}
-            <Badge className="bg-green-500/20 text-green-200 border-green-400/30 hover:bg-green-500/30 px-4 py-2 text-sm">
+            <Badge className="bg-green-500/20 text-green-200 border-green-400/30 hover:bg-green-500/30 px-4 py-2 text-sm cursor-hero-hand">
               <Folder className="w-4 h-4 mr-2" />
               {organization.totalProjects} Projects
             </Badge>
-            <Badge className="bg-purple-500/20 text-purple-200 border-purple-400/30 hover:bg-purple-500/30 px-4 py-2 text-sm">
+            <Badge className="bg-purple-500/20 text-purple-200 border-purple-400/30 hover:bg-purple-500/30 px-4 py-2 text-sm cursor-hero-hand">
               <Calendar className="w-4 h-4 mr-2" />
               {totalYears} Years Active
             </Badge>
@@ -79,7 +79,7 @@ export default function OrganizationHero({
                 href={organization.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors"
+                className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors cursor-hero-hand"
               >
                 <Globe className="w-4 h-4" />
                 Visit Website
@@ -92,7 +92,7 @@ export default function OrganizationHero({
                 href={organization.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors"
+                className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors cursor-hero-hand"
               >
                 <Github className="w-4 h-4" />
                 GitHub
@@ -104,7 +104,7 @@ export default function OrganizationHero({
                 href={`/organization/${encodeURIComponent(
                   organization.name
                 )}/contribute`}
-                className="group relative inline-flex items-center gap-2 bg-slate-700/50 hover:bg-slate-600/60 backdrop-blur-sm border border-slate-500/30 hover:border-slate-400/50 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl overflow-hidden"
+                className="group relative inline-flex items-center gap-2 bg-slate-700/50 hover:bg-slate-600/60 backdrop-blur-sm border border-slate-500/30 hover:border-slate-400/50 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl overflow-hidden cursor-hero-hand contribute-button"
               >
                 {/* Continuous animated background gradient */}
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-600/20 via-slate-500/30 to-slate-600/20 animate-pulse"></div>
@@ -115,7 +115,7 @@ export default function OrganizationHero({
                 {/* Continuous glow effect */}
                 <div className="absolute inset-0 rounded-lg bg-slate-400/20 animate-glow"></div>
 
-                <Rocket className="w-4 h-4 relative z-10 animate-bounce-subtle" />
+                <Rocket className="w-4 h-4 relative z-10 animate-bounce-subtle contribute-icon" />
                 <span className="relative z-10">Contribute</span>
               </Link>
             )}

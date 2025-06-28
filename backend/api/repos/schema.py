@@ -1,8 +1,9 @@
 import strawberry
 from typing import List, Optional
 from collections import Counter
+from enum import Enum
 from .utils import split_github_url
-from .github import open_issues, top_contributors
+from .github import open_issues, top_contributors, repo_stats
 
 @strawberry.type
 class Label:
@@ -12,6 +13,7 @@ class Label:
 class Assignee:
     login: str
     url: str
+    avatarUrl: str
 
 @strawberry.type
 class Issue:
@@ -26,6 +28,13 @@ class Contributor:
     login: str
     commits: int
     url: str
+    avatarUrl: str
+
+@strawberry.type
+class Language:
+    name: str
+    color: str
+    percentage: float
 
 @strawberry.type
 class LabelCount:
@@ -33,11 +42,22 @@ class LabelCount:
     count: int
 
 @strawberry.type
+class RepoStats:
+    stars: int
+    forks: int
+    languages: List[Language]
+
+@strawberry.type
 class IssueCounts:
     total_open: int
     unassigned: int
     assigned: int
     by_label: List[LabelCount]
+
+@strawberry.enum
+class ContributorPeriodEnum(Enum):
+    ALL_TIME = "all_time"
+    THIS_MONTH = "this_month"
 
 @strawberry.type
 class RepoInfo:
@@ -52,7 +72,14 @@ class RepoInfo:
 
         for node in raw:
             label_objs = [Label(name=l["name"]) for l in node.get("labels", {}).get("nodes", [])]
-            assignee_objs = [Assignee(login=a["login"], url=a["url"]) for a in node.get("assignees", {}).get("nodes", [])]
+            assignee_objs = [
+                Assignee(
+                    login=a["login"], 
+                    url=a["url"],
+                    avatarUrl=a.get("avatarUrl", f"https://github.com/{a['login']}.png?size=100")
+                ) 
+                for a in node.get("assignees", {}).get("nodes", [])
+            ]
 
             if issue_type and not any(lbl.name.lower() == issue_type.lower() for lbl in label_objs):
                 continue
@@ -70,8 +97,18 @@ class RepoInfo:
         return unassigned + assigned
 
     @strawberry.field
-    def contributors(self, info, limit: int = 25) -> List[Contributor]:
-        return [Contributor(**c) for c in top_contributors(self._owner, self._name, limit)]
+    def contributors(self, info, limit: int = 25, period: Optional[ContributorPeriodEnum] = None) -> List[Contributor]:
+        period_str = period.value if period else None
+        contributors = top_contributors(self._owner, self._name, limit, period_str)
+        return [
+            Contributor(
+                login=c["login"],
+                commits=c["commits"],
+                url=c["url"],
+                avatarUrl=c["avatarUrl"]
+            )
+            for c in contributors
+        ]
 
     @strawberry.field
     def issue_counts(self, info) -> IssueCounts:
@@ -96,6 +133,19 @@ class RepoInfo:
             unassigned=unassigned_count,
             assigned=assigned_count,
             by_label=label_counts
+        )
+
+    @strawberry.field
+    def stats(self, info) -> RepoStats:
+        raw = repo_stats(self._owner, self._name)
+        languages = [
+            Language(name=lang["name"], color=lang["color"], percentage=lang["percentage"])
+            for lang in raw["languages"]
+        ]
+        return RepoStats(
+            stars=raw["stars"],
+            forks=raw["forks"],
+            languages=languages
         )
 
 @strawberry.type

@@ -10,14 +10,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Home } from 'lucide-react';
+import { Home, Building, Rocket, Sparkles } from 'lucide-react';
 
 interface BreadcrumbNavProps {
   organizationName?: string;
+  repositoryName?: string;
 }
 
 export default function BreadcrumbNav({
   organizationName,
+  repositoryName,
 }: BreadcrumbNavProps) {
   const pathname = usePathname();
 
@@ -36,7 +38,7 @@ export default function BreadcrumbNav({
       <BreadcrumbItem key="home">
         <Link
           href="/"
-          className="flex items-center gap-1 hover:text-slate-900 transition-colors"
+          className="flex items-center gap-1 hover:text-slate-900 transition-colors cursor-pointer"
         >
           <Home className="h-4 w-4" />
           Home
@@ -52,7 +54,8 @@ export default function BreadcrumbNav({
         // Organization detail page
         items.push(
           <BreadcrumbItem key="organization">
-            <BreadcrumbPage className="text-slate-900 font-medium">
+            <BreadcrumbPage className="text-slate-900 font-medium flex items-center gap-1">
+              <Building className="h-4 w-4" />
               {organizationName || orgName}
             </BreadcrumbPage>
           </BreadcrumbItem>
@@ -63,16 +66,50 @@ export default function BreadcrumbNav({
           <BreadcrumbItem key="organization">
             <Link
               href={`/organization/${encodeURIComponent(orgName)}`}
-              className="hover:text-slate-900 transition-colors"
+              className="hover:text-slate-900 transition-colors flex items-center gap-1 cursor-pointer"
             >
+              <Building className="h-4 w-4" />
               {organizationName || orgName}
             </Link>
           </BreadcrumbItem>
         );
         items.push(
           <BreadcrumbItem key="contribute">
-            <BreadcrumbPage className="text-slate-900 font-medium">
+            <BreadcrumbPage className="text-slate-900 font-medium flex items-center gap-1">
+              <Rocket className="h-4 w-4" />
               Contribute
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        );
+      } else if (pathSegments[2] === 'repository') {
+        // Repository page: /organization/[name]/repository/[...params]
+        items.push(
+          <BreadcrumbItem key="organization">
+            <Link
+              href={`/organization/${encodeURIComponent(orgName)}`}
+              className="hover:text-slate-900 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Building className="h-4 w-4" />
+              {organizationName || orgName}
+            </Link>
+          </BreadcrumbItem>
+        );
+        items.push(
+          <BreadcrumbItem key="contribute">
+            <Link
+              href={`/organization/${encodeURIComponent(orgName)}/contribute`}
+              className="hover:text-slate-900 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Rocket className="h-4 w-4" />
+              Contribute
+            </Link>
+          </BreadcrumbItem>
+        );
+        items.push(
+          <BreadcrumbItem key="repository">
+            <BreadcrumbPage className="text-slate-900 font-medium flex items-center gap-1">
+              <Sparkles className="h-4 w-4" />
+              {repositoryName || 'Repository'}
             </BreadcrumbPage>
           </BreadcrumbItem>
         );

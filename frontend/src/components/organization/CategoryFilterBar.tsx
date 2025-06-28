@@ -62,7 +62,7 @@ export default function CategoryFilterBar({
                     )
                   }
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200
-                    flex items-center gap-1.5
+                    flex items-center gap-1.5 cursor-pointer
                     ${
                       selectedCategory === category
                         ? 'bg-black text-white'
@@ -84,7 +84,7 @@ export default function CategoryFilterBar({
               variant="ghost"
               size="sm"
               onClick={onResetFilters}
-              className="text-gray-600 hover:text-white h-7"
+              className="text-gray-600 hover:text-white h-7 cursor-pointer"
             >
               <RotateCcw className="mr-1 h-3 w-3" />
               Reset

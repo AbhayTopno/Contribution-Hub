@@ -21,27 +21,27 @@ export default function Navbar({ searchTerm, setSearchTerm }: NavbarProps) {
   };
 
   return (
-    <nav className="border-b border-gray-200 bg-white/30 backdrop-blur-md fixed top-0 z-50 w-full">
+    <nav className="bg-white/30 backdrop-blur-md fixed top-0 z-50 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-0 sm:h-16 gap-3 sm:gap-4">
           {/* Title */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 order-1 sm:order-1">
             <h1
-              className={`text-2xl font-bold tracking-tight ${jetbrainsMono.className}`}
+              className={`text-xl sm:text-2xl font-bold tracking-tight text-center sm:text-left ${jetbrainsMono.className}`}
             >
               Contribution Hub
             </h1>
           </div>
 
-          {/* Search and Filter */}
-          <div className="flex items-center space-x-4 flex-1 max-w-2xl mx-8">
-            <div className="relative flex-1">
+          {/* Search */}
+          <div className="order-2 sm:order-2 w-full sm:flex-1 sm:max-w-lg">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search organizations..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="pl-10 border-gray-300 bg-slate-100 hover:border-black transition-all duration-300 ease-in-out"
+                className="w-full pl-10 border-gray-300 bg-slate-100 hover:border-black transition-all duration-300 ease-in-out"
               />
               {searchTerm && (
                 <button
@@ -68,6 +68,7 @@ export default function Navbar({ searchTerm, setSearchTerm }: NavbarProps) {
           </div>
         </div>
       </div>
+      <div className="border-b border-gray-200"></div>
     </nav>
   );
 }

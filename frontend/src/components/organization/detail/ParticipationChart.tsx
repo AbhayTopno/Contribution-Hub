@@ -33,7 +33,7 @@ export default function ParticipationChart({ data }: ParticipationChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px] w-full">
+        <div className="h-[350px] w-full cursor-pointer">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
@@ -44,14 +44,16 @@ export default function ParticipationChart({ data }: ParticipationChartProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
                 dataKey="year"
-                tick={{ fontSize: 12, fill: '#64748b' }}
+                tick={{ fontSize: 12, fill: '#64748b', cursor: 'pointer' }}
                 tickMargin={10}
                 stroke="#94a3b8"
+                style={{ cursor: 'pointer' }}
               />
               <YAxis
-                tick={{ fontSize: 12, fill: '#64748b' }}
+                tick={{ fontSize: 12, fill: '#64748b', cursor: 'pointer' }}
                 tickMargin={10}
                 stroke="#94a3b8"
+                style={{ cursor: 'pointer' }}
               />
               <Tooltip
                 contentStyle={{
@@ -60,7 +62,9 @@ export default function ParticipationChart({ data }: ParticipationChartProps) {
                   borderRadius: '8px',
                   color: 'white',
                   boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                  cursor: 'pointer',
                 }}
+                cursor={{ fill: 'rgba(59, 130, 246, 0.1)', cursor: 'pointer' }}
               />
               <Bar
                 dataKey="projects"
@@ -68,6 +72,7 @@ export default function ParticipationChart({ data }: ParticipationChartProps) {
                 radius={[6, 6, 0, 0]}
                 stroke="#3b82f6"
                 strokeWidth={1}
+                style={{ cursor: 'pointer' }}
               />
               <defs>
                 <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">

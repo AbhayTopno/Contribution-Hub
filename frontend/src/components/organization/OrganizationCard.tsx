@@ -43,7 +43,7 @@ export default function OrganizationCard({ org }: { org: Organization }) {
           <div className="h-6 flex items-center justify-center">
             <Badge
               variant="outline"
-              className="text-xs text-black border-gray-300"
+              className="text-xs text-black border-gray-300 cursor-pointer"
             >
               {org.category}
             </Badge>
@@ -68,7 +68,7 @@ export default function OrganizationCard({ org }: { org: Organization }) {
                   <Badge
                     key={tech}
                     variant="secondary"
-                    className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
                   >
                     {tech}
                   </Badge>
@@ -76,7 +76,7 @@ export default function OrganizationCard({ org }: { org: Organization }) {
                 {org.techStack.length > 5 && (
                   <Badge
                     variant="secondary"
-                    className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
                   >
                     +{org.techStack.length - 5}
                   </Badge>

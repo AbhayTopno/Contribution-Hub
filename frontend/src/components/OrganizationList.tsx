@@ -162,7 +162,8 @@ export const OrganizationList: React.FC = () => {
         <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
         {/* Make this area scrollable and fill the rest of the screen */}
-        <div className="flex-1 overflow-y-auto mt-[64px]">
+        {/* Adjust top margin for mobile stacked navbar */}
+        <div className="flex-1 overflow-y-auto mt-[100px] sm:mt-[64px]">
           <CategoryFilterBar
             categories={filterOptionsData?.allCategories || []}
             selectedCategory={selectedCategory}

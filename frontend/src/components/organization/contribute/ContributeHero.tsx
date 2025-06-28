@@ -2,7 +2,14 @@
 
 import Image from 'next/image';
 import { JetBrains_Mono } from 'next/font/google';
-import { Github, ExternalLink, Folder, Star, GitFork } from 'lucide-react';
+import {
+  Github,
+  ExternalLink,
+  Folder,
+  Star,
+  GitFork,
+  Code,
+} from 'lucide-react';
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
 
@@ -17,6 +24,7 @@ interface ContributeHeroProps {
   repositoryCount: number;
   totalStars?: number;
   totalForks?: number;
+  topLanguages?: Array<{ name: string; count: number; color?: string }>;
 }
 
 export default function ContributeHero({
@@ -25,9 +33,16 @@ export default function ContributeHero({
   repositoryCount,
   totalStars = 0,
   totalForks = 0,
+  topLanguages = [],
 }: ContributeHeroProps) {
+  // Get top 3 languages and calculate others
+  const top3Languages = topLanguages.slice(0, 3);
+  const othersCount = topLanguages
+    .slice(3)
+    .reduce((sum, lang) => sum + lang.count, 0);
+
   return (
-    <div className="bg-gradient-to-r from-slate-950 via-slate-800 to-slate-950 rounded-2xl p-8 mb-4 shadow-xl">
+    <div className="bg-gradient-to-r from-slate-950 via-slate-800 to-slate-950 rounded-2xl p-8 mb-4 shadow-xl cursor-hero-pointer">
       <div className="flex flex-col lg:flex-row items-start gap-8">
         {organization.imageUrl && (
           <div className="flex-shrink-0">
@@ -55,14 +70,14 @@ export default function ContributeHero({
           </p>
 
           <div className="flex flex-wrap gap-3 mb-6">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-lg">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-lg cursor-hero-hand">
               <Folder className="w-4 h-4 text-green-300" />
               <span className="text-sm font-medium text-green-200">
                 {loading ? '...' : repositoryCount} Repositories
               </span>
             </div>
             {totalStars > 0 && (
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-lg cursor-hero-hand">
                 <Star className="w-4 h-4 text-yellow-300" />
                 <span className="text-sm font-medium text-yellow-200">
                   {totalStars.toLocaleString()} Stars
@@ -70,21 +85,64 @@ export default function ContributeHero({
               </div>
             )}
             {totalForks > 0 && (
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-lg cursor-hero-hand">
                 <GitFork className="w-4 h-4 text-blue-300" />
                 <span className="text-sm font-medium text-blue-200">
                   {totalForks.toLocaleString()} Forks
                 </span>
               </div>
             )}
+            {topLanguages.length > 0 && (
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-lg cursor-hero-hand">
+                <Code className="w-4 h-4 text-purple-300" />
+                <span className="text-sm font-medium text-purple-200">
+                  {topLanguages.length} Languages
+                </span>
+              </div>
+            )}
           </div>
+
+          {/* Top 3 Languages */}
+          {top3Languages.length > 0 && (
+            <div className="flex flex-wrap gap-4 mb-6">
+              {top3Languages.map((language, index) => (
+                <div
+                  key={language.name}
+                  className="flex items-center gap-2 cursor-hero-hand"
+                >
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{
+                      backgroundColor:
+                        language.color || `hsl(${index * 120}, 70%, 60%)`,
+                    }}
+                  />
+                  <span className="text-sm font-medium text-white">
+                    {language.name}
+                  </span>
+                  <span className="text-xs text-slate-300">
+                    ({language.count})
+                  </span>
+                </div>
+              ))}
+              {othersCount > 0 && (
+                <div className="flex items-center gap-2 cursor-hero-hand">
+                  <div className="w-3 h-3 rounded-full bg-slate-400" />
+                  <span className="text-sm font-medium text-white">Others</span>
+                  <span className="text-xs text-slate-300">
+                    ({othersCount})
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {organization.githubUrl && (
             <a
               href={organization.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 font-medium transition-colors cursor-hero-hand"
             >
               <Github className="w-4 h-4" />
               View on GitHub
