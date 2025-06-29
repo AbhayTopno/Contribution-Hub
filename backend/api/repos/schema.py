@@ -39,7 +39,7 @@ class Contributor:
 @strawberry.type
 class Language:
     name: str
-    color: str
+    color: Optional[str]  # Changed from str to Optional[str]
     percentage: float
 
 

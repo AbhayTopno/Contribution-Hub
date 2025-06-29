@@ -33,11 +33,11 @@ export default function BreadcrumbNav({
   const getBreadcrumbItems = () => {
     const items = [];
 
-    // Always start with Home
+    // Always start with Home, linking to /organizations
     items.push(
       <BreadcrumbItem key="home">
         <Link
-          href="/"
+          href="/organizations"
           className="flex items-center gap-1 hover:text-slate-900 transition-colors cursor-pointer"
         >
           <Home className="h-4 w-4" />

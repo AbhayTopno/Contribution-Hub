@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import type React from 'react';
 import { JetBrains_Mono } from 'next/font/google';
 import { Search } from 'lucide-react';
+import Link from 'next/link'; // Import Link
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
 
@@ -24,13 +25,15 @@ export default function Navbar({ searchTerm, setSearchTerm }: NavbarProps) {
     <nav className="bg-white/30 backdrop-blur-md fixed top-0 z-50 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-0 sm:h-16 gap-3 sm:gap-4">
-          {/* Title */}
+          {/* Title - Links to Landing Page */}
           <div className="flex-shrink-0 order-1 sm:order-1">
-            <h1
-              className={`text-xl sm:text-2xl font-bold tracking-tight text-center sm:text-left ${jetbrainsMono.className}`}
-            >
-              Contribution Hub
-            </h1>
+            <Link href="/" className="block">
+              <h1
+                className={`text-xl sm:text-2xl font-bold tracking-tight text-center sm:text-left text-black hover:text-gray-700 transition-colors ${jetbrainsMono.className}`}
+              >
+                Contribution Hub
+              </h1>
+            </Link>
           </div>
 
           {/* Search */}
