@@ -1,11 +1,14 @@
 import strawberry
 from typing import List, Optional
+
 from .utils import fetch_all_org_repos
+
 
 @strawberry.type
 class Language:
     name: str
     color: Optional[str] = "#000000"
+
 
 @strawberry.type
 class Repository:
@@ -17,44 +20,45 @@ class Repository:
     last_commit_date: str
     languages: List[Language]
 
+
 @strawberry.type
 class Query:
     @strawberry.field
     def github_repos(self, github_url: str) -> List[Repository]:
-        repos_data = fetch_all_org_repos(github_url)
-        
-        repositories = []
-        for repo in repos_data:
-            languages = []
-            for edge in repo.get("languages", {}).get("edges", []):
-                node = edge.get("node", {})
-                if node.get("name"):
-                    languages.append(Language(
-                        name=node["name"],
-                        color=node.get("color", "#000000")
-                    ))
-            
-            if not languages:
+        data = fetch_all_org_repos(github_url)
+
+        repos: List[Repository] = []
+        for r in data:
+            langs = [
+                Language(name=e["node"]["name"], color=e["node"].get("color", "#000000"))
+                for e in r.get("languages", {}).get("edges", [])
+                if e.get("node", {}).get("name")
+            ]
+            if not langs:
                 continue
-            
-            commit_date = None
-            if repo.get("defaultBranchRef", {}).get("target"):
-                commit_date = repo["defaultBranchRef"]["target"].get("committedDate")
-            if not commit_date:
-                commit_date = repo.get("pushedAt")
+
+            commit_date = (
+                r.get("defaultBranchRef", {}).get("target", {}).get("committedDate")
+                or r.get("pushedAt")
+            )
             if not commit_date:
                 continue
-            
-            repositories.append(Repository(
-                name=repo["name"],
-                url=repo["url"],
-                description=repo.get("description"),
-                stars=repo.get("stargazerCount", 0),
-                forks=repo.get("forkCount", 0),
-                last_commit_date=commit_date,
-                languages=languages
-            ))
-        
-        return repositories
+
+            repos.append(
+                Repository(
+                    name=r["name"],
+                    url=r["url"],
+                    description=r.get("description"),
+                    stars=r.get("stargazerCount", 0),
+                    forks=r.get("forkCount", 0),
+                    last_commit_date=commit_date,
+                    languages=langs,
+                )
+            )
+
+        # ⭐️ Return biggest‑to‑smallest by stargazer count
+        repos.sort(key=lambda repo: repo.stars, reverse=True)
+        return repos
+
 
 schema = strawberry.Schema(query=Query)

@@ -1,49 +1,55 @@
-import requests
 import os
-from datetime import datetime, timedelta
-from typing import List, Dict
-from dotenv import load_dotenv
-from functools import lru_cache
 import time
-import re
+from datetime import datetime, timedelta
+from functools import lru_cache
+from typing import List, Dict
+from urllib.parse import urlparse
+
+import requests
+from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("GITHUB_TOKEN")
+TOKEN   = os.getenv("GITHUB_TOKEN")
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
-def extract_org_from_github_url(github_url: str) -> str:
-    """Extract organization name from GitHub URL"""
-    # Handle various GitHub URL formats
-    patterns = [
-        r'github\.com/([^/]+)',  # https://github.com/org or http://github.com/org
-        r'github\.com/([^/]+)/',  # https://github.com/org/
-        r'github\.com/([^/]+)/.*',  # https://github.com/org/repo
-    ]
-    
-    for pattern in patterns:
-        match = re.search(pattern, github_url, re.IGNORECASE)
-        if match:
-            return match.group(1)
-    
-    # If no pattern matches, assume it's already an org name
-    return github_url
 
-@lru_cache(maxsize=16)
-def _cached_fetch(org_name: str, cache_key: str) -> List[Dict]:
-    return _fetch_repos(org_name)
+# ──────────────────────────────────────────────────────────────────────────────
+# Helpers
+# ──────────────────────────────────────────────────────────────────────────────
+def extract_org_from_github_url(github_url: str) -> str:
+    """
+    Return the organisation / user segment of a GitHub URL, e.g.
+    ➜  "https://github.com/OWASP/NVD" -> "OWASP"
+    """
+    path = urlparse(github_url).path.strip("/")          # → "OWASP/NVD"
+    return path.split("/")[0] or github_url              # fallback: raw arg
+
 
 def _get_cache_key() -> str:
+    # One entry per (org, 10‑minute window)
     now = datetime.now()
-    return now.replace(minute=(now.minute // 10) * 10, second=0, microsecond=0).isoformat()
+    return f"{now:%Y%m%d%H}{now.minute // 10}"           # compact string
 
+
+@lru_cache(maxsize=32)
+def _cached_fetch(org_name: str, cache_key: str) -> List[Dict]:
+    # cache_key is only to bust the cache; it is ignored inside
+    return _fetch_repos(org_name)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Network layer
+# ──────────────────────────────────────────────────────────────────────────────
 def _fetch_repos(org_name: str) -> List[Dict]:
-    one_month_ago = datetime.now() - timedelta(days=30)
-    
-    query = """
+    """Return ≤ 100 repos pushed within the last 30 days (fast‑exit once older)."""
+    one_month_ago = datetime.utcnow() - timedelta(days=30)
+
+    gql = """
     query($login: String!, $after: String) {
       organization(login: $login) {
-        repositories(first: 100, after: $after, orderBy: {field: PUSHED_AT, direction: DESC}) {
+        repositories(first: 100, after: $after,
+                     orderBy: {field: PUSHED_AT, direction: DESC}) {
           pageInfo { hasNextPage endCursor }
           nodes {
             name url description stargazerCount forkCount pushedAt
@@ -56,60 +62,61 @@ def _fetch_repos(org_name: str) -> List[Dict]:
       }
     }
     """
-    
-    all_repos = []
-    after_cursor = None
+
+    repos: List[Dict] = []
+    after = None
     session = requests.Session()
     session.headers.update(HEADERS)
-    
+
     try:
-        while len(all_repos) < 100:
-            response = session.post(
+        while True:
+            r = session.post(
                 "https://api.github.com/graphql",
-                json={"query": query, "variables": {"login": org_name, "after": after_cursor}},
-                timeout=15
+                json={"query": gql, "variables": {"login": org_name, "after": after}},
+                timeout=15,
             )
-            
-            if response.status_code == 403:
-                reset_time = response.headers.get('X-RateLimit-Reset')
-                if reset_time:
-                    wait = int(reset_time) - int(time.time())
-                    if 0 < wait < 300:
-                        time.sleep(wait)
-                        continue
+
+            # Handle secondary‑rate‑limit gently (wait ≤ 5 min)
+            if r.status_code == 403 and (reset := r.headers.get("X-RateLimit-Reset")):
+                wait = int(reset) - int(time.time())
+                if wait > 0:
+                    time.sleep(min(wait, 300))
+                    continue
+            if r.status_code != 200:
                 break
-            
-            if response.status_code != 200:
+
+            data = r.json().get("data", {}).get("organization")
+            if not data:
                 break
-                
-            data = response.json()
-            if "errors" in data or not data.get("data", {}).get("organization"):
+
+            for repo in data["repositories"]["nodes"]:
+                pushed = repo.get("pushedAt")
+                if not pushed:
+                    continue
+                pushed_dt = datetime.fromisoformat(pushed.rstrip("Z") + "+00:00")
+
+                # Because results are already push‑date‑DESC, we can exit early
+                if pushed_dt < one_month_ago.replace(tzinfo=pushed_dt.tzinfo):
+                    return repos
+
+                repos.append(repo)
+                if len(repos) >= 100:
+                    return repos
+
+            page = data["repositories"]["pageInfo"]
+            if not page["hasNextPage"]:
                 break
-            
-            repos = data["data"]["organization"]["repositories"]["nodes"]
-            
-            for repo in repos:
-                pushed_at = repo.get("pushedAt")
-                if pushed_at:
-                    try:
-                        pushed_date = datetime.fromisoformat(pushed_at.replace('Z', '+00:00'))
-                        if pushed_date >= one_month_ago.replace(tzinfo=pushed_date.tzinfo):
-                            all_repos.append(repo)
-                        else:
-                            return all_repos
-                    except:
-                        continue
-            
-            page_info = data["data"]["organization"]["repositories"]["pageInfo"]
-            if not page_info["hasNextPage"]:
-                break
-            after_cursor = page_info["endCursor"]
-    
+            after = page["endCursor"]
+
     finally:
         session.close()
-    
-    return all_repos
 
+    return repos
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Public entry point
+# ──────────────────────────────────────────────────────────────────────────────
 def fetch_all_org_repos(github_url_or_org: str) -> List[Dict]:
-    org_name = extract_org_from_github_url(github_url_or_org)
-    return _cached_fetch(org_name, _get_cache_key())
+    org = extract_org_from_github_url(github_url_or_org)
+    return _cached_fetch(org, _get_cache_key())
