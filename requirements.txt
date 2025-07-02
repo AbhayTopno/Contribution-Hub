@@ -6,3 +6,5 @@ strawberry-graphql[django]==0.269.0
 django-cors-headers==4.7.0
 strawberry-django-jwt==0.2.3
 python-jose[cryptography]==3.4.0
+django-redis==6.0.0
+redis==6.2.0

@@ -1,48 +1,28 @@
 import os
 import time
 from datetime import datetime, timedelta
-from functools import lru_cache
 from typing import List, Dict
 from urllib.parse import urlparse
 
 import requests
 from dotenv import load_dotenv
+from api.common.cache import redis_cached
 
 load_dotenv()
 
-TOKEN   = os.getenv("GITHUB_TOKEN")
+TOKEN = os.getenv("GITHUB_TOKEN")
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ──────────────────────────────────────────────────────────────────────────────
 def extract_org_from_github_url(github_url: str) -> str:
-    """
-    Return the organisation / user segment of a GitHub URL, e.g.
-    ➜  "https://github.com/OWASP/NVD" -> "OWASP"
-    """
-    path = urlparse(github_url).path.strip("/")          # → "OWASP/NVD"
-    return path.split("/")[0] or github_url              # fallback: raw arg
+    path = urlparse(github_url).path.strip("/")       
+    return path.split("/")[0] or github_url
 
 
 def _get_cache_key() -> str:
-    # One entry per (org, 10‑minute window)
     now = datetime.now()
-    return f"{now:%Y%m%d%H}{now.minute // 10}"           # compact string
+    return f"{now:%Y%m%d%H}{now.minute // 10}"
 
-
-@lru_cache(maxsize=32)
-def _cached_fetch(org_name: str, cache_key: str) -> List[Dict]:
-    # cache_key is only to bust the cache; it is ignored inside
-    return _fetch_repos(org_name)
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Network layer
-# ──────────────────────────────────────────────────────────────────────────────
 def _fetch_repos(org_name: str) -> List[Dict]:
-    """Return ≤ 100 repos pushed within the last 30 days (fast‑exit once older)."""
     one_month_ago = datetime.utcnow() - timedelta(days=30)
 
     gql = """
@@ -76,12 +56,13 @@ def _fetch_repos(org_name: str) -> List[Dict]:
                 timeout=15,
             )
 
-            # Handle secondary‑rate‑limit gently (wait ≤ 5 min)
+            # secondary‑rate‑limit: wait ≤ 5 min then retry
             if r.status_code == 403 and (reset := r.headers.get("X-RateLimit-Reset")):
                 wait = int(reset) - int(time.time())
                 if wait > 0:
                     time.sleep(min(wait, 300))
                     continue
+
             if r.status_code != 200:
                 break
 
@@ -95,7 +76,6 @@ def _fetch_repos(org_name: str) -> List[Dict]:
                     continue
                 pushed_dt = datetime.fromisoformat(pushed.rstrip("Z") + "+00:00")
 
-                # Because results are already push‑date‑DESC, we can exit early
                 if pushed_dt < one_month_ago.replace(tzinfo=pushed_dt.tzinfo):
                     return repos
 
@@ -113,10 +93,10 @@ def _fetch_repos(org_name: str) -> List[Dict]:
 
     return repos
 
+@redis_cached()
+def _cached_fetch(org_name: str, _placeholder: str) -> List[Dict]:
+    return _fetch_repos(org_name)
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Public entry point
-# ──────────────────────────────────────────────────────────────────────────────
 def fetch_all_org_repos(github_url_or_org: str) -> List[Dict]:
     org = extract_org_from_github_url(github_url_or_org)
     return _cached_fetch(org, _get_cache_key())

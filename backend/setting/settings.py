@@ -123,3 +123,15 @@ CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 
 GOOGLE_CSE_API_KEY = os.getenv('GOOGLE_CSE_API_KEY')
 GOOGLE_CSE_ID = os.getenv('GOOGLE_CSE_ID')
+
+REDIS_URL = os.getenv('REDIS_URL')
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        "TIMEOUT": 0,
+    }
+}
