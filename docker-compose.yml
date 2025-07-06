@@ -1,0 +1,80 @@
+services:
+  db:
+    container_name: db
+    image: postgres:latest
+    env_file:
+      - ./backend/.env
+    environment:
+      - POSTGRES_DB=${DB_NAME:-postgres}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - ch_network
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DJANGO_DB_USER:-postgres}',
+          -d,
+          '${DJANGO_DB_NAME:-postgres}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, ping]
+      timeout: 5s
+    networks:
+      - ch_network
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: dockerfile.backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - '8000:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - ch_network
+
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: dockerfile.frontend
+    env_file:
+      - ./frontend/.env
+    ports:
+      - '3000:3000'
+    dns:
+      - 8.8.8.8
+    depends_on:
+      - backend
+    networks:
+      - ch_network
+
+volumes:
+  db_data:
+
+networks:
+  ch_network:
+    driver: bridge

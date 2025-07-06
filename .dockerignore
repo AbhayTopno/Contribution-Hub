@@ -1,0 +1,26 @@
+# Node modules, build artifacts
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+
+# Environment files
+frontend/.env
+frontend/.env.*
+
+# System/IDE/OS-specific
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Git & logs
+.git/
+.gitignore
+*.log
+
+# Optional caches
+.npm
+.pnpm-store
+pnpm-debug.log*

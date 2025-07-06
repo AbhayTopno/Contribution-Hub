@@ -21,6 +21,10 @@ def google_items(query: str) -> List[dict]:
 def first_github_url(items: List[dict]) -> Optional[str]:
     for item in items:
         url = item.get("link", "")
-        if urllib.parse.urlparse(url).netloc.endswith("github.com"):
-            return url
+        parsed_url = urllib.parse.urlparse(url)
+        
+        if parsed_url.netloc == "github.com":
+            path_parts = parsed_url.path.strip('/').split('/')
+            if len(path_parts) >= 1 and path_parts[0]:
+                return f"https://github.com/{path_parts[0]}"
     return None

@@ -1,7 +1,7 @@
 import json
 import requests
 from django.core.management.base import BaseCommand
-from gsoc_api.models import Organization, YearlyParticipation
+from api.gsoc_api.models import Organization, YearlyParticipation
 
 class Command(BaseCommand):
     help = 'Fetch GSoC organizations from API and store in database'
