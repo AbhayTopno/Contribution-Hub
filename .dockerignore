@@ -6,8 +6,8 @@ frontend/dist/
 frontend/build/
 
 # Environment files
-frontend/.env
-frontend/.env.*
+.env
+.env.*
 
 # System/IDE/OS-specific
 .vscode/

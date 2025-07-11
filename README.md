@@ -1,109 +1,108 @@
-# Contribution-Hub
+# Contribution Hub
 
-# Project Setup Guide
+**Contribution Hub** is a platform designed to help developers discover open source projects that match their field of interest and tech stack. Whether you're a beginner looking for your first contribution or an experienced developer seeking new challenges, Contribution Hub connects you with projects that align with your skills and interests.
 
-This project consists of a backend and frontend application with specific environment configurations.
+## Features
 
-## Environment Setup
+- 🔍 **Smart Project Discovery**: Find projects based on your preferred technologies and interests
+- 📊 **Tech Stack Matching**: Get recommendations tailored to your skill set
+- 🎯 **Interest-Based Filtering**: Discover projects in domains you're passionate about
+- 🚀 **Beginner-Friendly**: Easy-to-use interface for developers of all levels
 
-### Backend Setup
+## Quick Start
 
-1. Navigate to the backend directory:
+### Prerequisites
+
+- Docker and Docker Compose installed
+- Docker running in the background
+
+### Setup Instructions
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/AbhayTopno/Contribution-Hub.git
+   cd contribution-hub
+   ```
+
+2. **Environment Configuration**
+
+   **Backend Setup:**
 
    ```bash
    cd backend
-   ```
-
-2. Create your environment file from the example:
-
-   ```bash
    cp .env.example .env
    ```
 
-3. Edit the `.env` file with your actual values:
+   Edit `.env` with your values:
 
-   ```bash
-   nano .env
-   # or use your preferred editor
-   ```
+   - `GITHUB_TOKEN`: GitHub personal access token
+   - `GOOGLE_CSE_API_KEY`: Google Custom Search Engine API key
+   - `GOOGLE_CSE_ID`: Google Custom Search Engine ID
 
-4. Configure the following variables:
-   - `DB_PASSWORD`: Set your PostgreSQL password
-   - `SECRET_KEY`: Generate a new Django secret key
-   - `GITHUB_TOKEN`: Add your GitHub personal access token
-   - `GOOGLE_CSE_API_KEY`: Add your Google Custom Search Engine API key
-   - `GOOGLE_CSE_ID`: Add your Google Custom Search Engine ID
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
+   **Frontend Setup:**
 
    ```bash
    cd frontend
-   ```
-
-2. Create your environment file from the example:
-
-   ```bash
    cp .env.example .env
    ```
 
-3. The default values should work for local development, but you can modify them if needed:
+3. **Start the Application**
+
    ```bash
-   nano .env
-   # or use your preferred editor
+   docker compose up --build -d
    ```
 
-## Quick Setup Commands
+   ✅ Ensure all services show "Healthy" status (backend, frontend, container_backend, container_frontend, container_db).
 
-If you prefer to use the example files directly (for development purposes):
+4. **Database Setup**
 
-```bash
-# Backend
-cd backend
-cat .env.example > .env
+   ```bash
+   # Run database migrations
+   docker exec -it backend python manage.py migrate
 
-# Frontend
-cd frontend
-cat .env.example > .env
-```
+   # Fetch GSoC organizations data
+   docker exec -it backend python manage.py fetch_gsoc_orgs
 
-## Important Notes
+   # Fetch GitHub URLs
+   docker exec -it backend python manage.py fetch_github_url --limit 105
+   ```
 
-- **Never commit your actual `.env` files** to version control
-- The `.env.example` files are templates and should be committed to the repository
-- Make sure to update your actual environment variables with real values before running the application
-- For production deployments, use secure methods to manage environment variables
+   **Note:** The Google Custom Search Engine API has a daily limit of 100-105 requests. You may need to create additional API keys and CSE IDs to scrape remaining GitHub URLs if you exceed this limit.
 
-## Security Considerations
+5. **Access the Application**
+   - Frontend: `http://localhost:3000`
+   - Backend API: `http://localhost:8000`
 
-- Generate a new `SECRET_KEY` for Django in production
-- Use strong database passwords
-- Keep your API keys secure and rotate them regularly
-- Consider using environment-specific configuration for different deployment stages
-
-## Getting API Keys
+## API Keys Setup
 
 ### GitHub Token
 
 1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Generate a new token with appropriate permissions
-3. Copy the token and add it to your `.env` file
+2. Generate a new token with repository access permissions
+3. Add to your `.env` file
 
 ### Google Custom Search Engine
 
-1. Visit the [Google Custom Search Engine](https://cse.google.com/) page
-2. Create a new search engine or use an existing one
-3. Get your API key from the [Google Cloud Console](https://console.cloud.google.com/)
-4. Add both the API key and CSE ID to your `.env` file
+1. Visit [Google Custom Search Engine](https://cse.google.com/)
+2. Create a new search engine
+3. Get your API key from [Google Cloud Console](https://console.cloud.google.com/)
+4. Add both API key and CSE ID to your `.env` file
 
-## Next Steps
+## Security Notes
 
-After setting up your environment files:
+- Never commit `.env` files to version control
+- Use strong passwords and rotate API keys regularly
+- Generate a new `SECRET_KEY` for production environments
 
-1. Install dependencies for both backend and frontend
-2. Set up your database
-3. Run migrations (if applicable)
-4. Start your development servers
+## Contributing
 
-Make sure both applications can communicate with each other using the configured endpoints.
+We welcome contributions! Please feel free to submit issues and enhancement requests.
+
+## Support
+
+If you encounter any issues during setup, please check that:
+
+- Docker is running properly
+- All environment variables are correctly set
+- Required API keys have appropriate permissions

@@ -1,22 +1,30 @@
+# Stage 1: Build
 FROM node:18-alpine AS builder
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV CI=true
 RUN corepack enable
 WORKDIR /app
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
+
+# Copy essential files first
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/.env ./
+
+# Install dependencies and build
 RUN pnpm install --frozen-lockfile
 COPY frontend/ ./
 RUN pnpm build
 
-FROM node:18-alpine AS runtime
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# Stage 2: Runtime
+FROM node:18-alpine
 WORKDIR /app
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-COPY --from=builder /app .
+
+# Copy only necessary production files
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.next/server ./.next/server
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.env ./
+
 EXPOSE 3000
-CMD ["pnpm", "run", "dev"]
+ENV PORT 3000
+CMD ["node", "server.js"]
