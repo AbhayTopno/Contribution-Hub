@@ -22,7 +22,7 @@
 
    ```bash
    git clone https://github.com/AbhayTopno/Contribution-Hub.git
-   cd contribution-hub
+   cd Contribution-hub
    ```
 
 2. **Environment Configuration**
@@ -30,8 +30,8 @@
    **Backend Setup:**
 
    ```bash
-   cd backend
-   cp .env.example .env
+   touch backend/.env
+   cat backend/.env.example > backend/.env
    ```
 
    Edit `.env` with your values:
@@ -43,8 +43,8 @@
    **Frontend Setup:**
 
    ```bash
-   cd frontend
-   cp .env.example .env
+   touch frontend/.env
+   cat frontend/.env.example > frontend/.env
    ```
 
 3. **Start the Application**

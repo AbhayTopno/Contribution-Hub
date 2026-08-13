@@ -64,9 +64,17 @@ export interface GitHubRepo {
 }
 
 export interface GitHubReposData {
-  githubRepos: GitHubRepo[];
+  githubRepos: {
+    repositories: GitHubRepo[];
+    totalCount: number;
+    hasNextPage: boolean;
+    totalStars: number;
+    totalForks: number;
+  };
 }
 
 export interface GitHubReposQueryVariables {
   githubUrl: string;
+  limit?: number;
+  offset?: number;
 }

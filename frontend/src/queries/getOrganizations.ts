@@ -83,17 +83,23 @@ export const GET_ORGANIZATION = gql`
 `;
 
 export const GET_GITHUB_REPOS = gql`
-  query GetGitHubRepos($githubUrl: String!) {
-    githubRepos(githubUrl: $githubUrl) {
-      name
-      description
-      url
-      stars
-      forks
-      lastCommitDate
-      languages {
+  query GetGitHubRepos($githubUrl: String!, $limit: Int, $offset: Int) {
+    githubRepos(githubUrl: $githubUrl, limit: $limit, offset: $offset) {
+      totalCount
+      hasNextPage
+      totalStars
+      totalForks
+      repositories {
         name
-        color
+        description
+        url
+        stars
+        forks
+        lastCommitDate
+        languages {
+          name
+          color
+        }
       }
     }
   }

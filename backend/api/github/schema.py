@@ -22,9 +22,20 @@ class Repository:
 
 
 @strawberry.type
+class RepositoryPage:
+    repositories: List[Repository]
+    total_count: int
+    has_next_page: bool
+    total_stars: int
+    total_forks: int
+
+
+@strawberry.type
 class Query:
     @strawberry.field
-    def github_repos(self, github_url: str) -> List[Repository]:
+    def github_repos(
+        self, github_url: str, limit: int = 9, offset: int = 0
+    ) -> RepositoryPage:
         data = fetch_all_org_repos(github_url)
 
         repos: List[Repository] = []
@@ -56,9 +67,19 @@ class Query:
                 )
             )
 
-        # ⭐️ Return biggest‑to‑smallest by stargazer count
+        # Return biggest-to-smallest by stargazer count
         repos.sort(key=lambda repo: repo.stars, reverse=True)
-        return repos
+
+        total_count = len(repos)
+        page = repos[offset : offset + limit]
+
+        return RepositoryPage(
+            repositories=page,
+            total_count=total_count,
+            has_next_page=offset + limit < total_count,
+            total_stars=sum(repo.stars for repo in repos),
+            total_forks=sum(repo.forks for repo in repos),
+        )
 
 
 schema = strawberry.Schema(query=Query)
