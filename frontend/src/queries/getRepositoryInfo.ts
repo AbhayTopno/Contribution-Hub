@@ -1,26 +1,16 @@
 import { gql } from "@apollo/client"
 
-export const GET_REPO_INFO = gql`
-  query GetRepoInfo($url: String!, $limit: Int, $issueType: String, $period: ContributorPeriodEnum) {
+export const GET_REPOSITORY_HERO = gql`
+  query GetRepositoryHero($url: String!) {
     repoInfo(url: $url) {
-      issues(issueType: $issueType) {
-        assignees {
-          login
-          url
-          avatarUrl
-        }
-        createdAt
-        labels {
+      stats {
+        stars
+        forks
+        languages {
           name
+          color
+          percentage
         }
-        title
-        url
-      }
-      contributors(period: $period, limit: $limit) {
-        login
-        commits
-        url
-        avatarUrl
       }
       issueCounts {
         assigned
@@ -31,14 +21,58 @@ export const GET_REPO_INFO = gql`
         unassigned
         totalOpen
       }
-      stats {
-        stars
-        forks
-        languages {
+    }
+  }
+`
+
+export const GET_REPOSITORY_ISSUES = gql`
+  query GetRepositoryIssues(
+    $url: String!
+    $issueType: String
+    $limit: Int
+    $offset: Int
+  ) {
+    repoInfo(url: $url) {
+      issueCounts {
+        byLabel {
+          count
           name
-          color
-          percentage
         }
+        totalOpen
+      }
+      issues(issueType: $issueType, limit: $limit, offset: $offset) {
+        totalCount
+        hasNextPage
+        issues {
+          assignees {
+            login
+            url
+            avatarUrl
+          }
+          createdAt
+          labels {
+            name
+          }
+          title
+          url
+        }
+      }
+    }
+  }
+`
+
+export const GET_REPOSITORY_CONTRIBUTORS = gql`
+  query GetRepositoryContributors(
+    $url: String!
+    $period: ContributorPeriodEnum
+    $limit: Int
+  ) {
+    repoInfo(url: $url) {
+      contributors(period: $period, limit: $limit) {
+        login
+        commits
+        url
+        avatarUrl
       }
     }
   }

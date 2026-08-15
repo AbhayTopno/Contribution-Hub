@@ -47,22 +47,47 @@ export interface Issue {
   url: string
 }
 
-export interface RepoInfo {
-  contributors: Contributor[]
-  stats: RepoStats
-  issueCounts: IssueCounts
+export interface IssuePage {
   issues: Issue[]
-}
-
-export interface RepoInfoData {
-  repoInfo: RepoInfo
+  totalCount: number
+  hasNextPage: boolean
 }
 
 export type ContributorPeriodEnum = "THIS_MONTH" | "ALL_TIME"
 
-export interface RepoInfoVariables {
+export interface RepoHeroData {
+  repoInfo: {
+    stats: RepoStats
+    issueCounts: IssueCounts
+  }
+}
+
+export interface RepoHeroVariables {
   url: string
-  limit?: number
+}
+
+export interface RepoIssuesData {
+  repoInfo: {
+    issueCounts: IssueCounts
+    issues: IssuePage
+  }
+}
+
+export interface RepoIssuesVariables {
+  url: string
   issueType?: string
+  limit?: number
+  offset?: number
+}
+
+export interface RepoContributorsData {
+  repoInfo: {
+    contributors: Contributor[]
+  }
+}
+
+export interface RepoContributorsVariables {
+  url: string
   period?: ContributorPeriodEnum
+  limit?: number
 }

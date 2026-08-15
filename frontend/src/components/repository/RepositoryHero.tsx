@@ -1,9 +1,13 @@
 'use client';
 
+import { useQuery } from '@apollo/client';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { JetBrains_Mono } from 'next/font/google';
 import { Badge } from '@/components/ui/badge';
 import { Star, GitFork, ExternalLink, Github, Code } from 'lucide-react';
-import type { RepoStats, IssueCounts } from '@/types/repository';
+import { GET_REPOSITORY_HERO } from '@/queries/getRepositoryInfo';
+import { repoClient } from '@/lib/apolloClient';
+import type { RepoHeroData, RepoHeroVariables } from '@/types/repository';
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
 
@@ -11,17 +15,61 @@ interface RepositoryHeroProps {
   repoUrl: string;
   repoName: string;
   orgName: string;
-  stats?: RepoStats;
-  issueCounts?: IssueCounts;
+}
+
+function HeroSkeleton() {
+  return (
+    <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 rounded-2xl p-8 mb-6 shadow-2xl border border-slate-800">
+      <div className="space-y-4">
+        <div className="h-6 w-32 bg-slate-700 rounded animate-pulse" />
+        <div className="h-12 w-64 bg-slate-700 rounded animate-pulse" />
+        <div className="h-4 w-96 max-w-full bg-slate-700 rounded animate-pulse" />
+        <div className="flex gap-3">
+          <div className="h-8 w-20 bg-slate-700 rounded-full animate-pulse" />
+          <div className="h-8 w-24 bg-slate-700 rounded-full animate-pulse" />
+          <div className="h-8 w-28 bg-slate-700 rounded-full animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function RepositoryHero({
   repoUrl,
   repoName,
   orgName,
-  stats,
-  issueCounts,
 }: RepositoryHeroProps) {
+  const { loading, error, data } = useQuery<RepoHeroData, RepoHeroVariables>(
+    GET_REPOSITORY_HERO,
+    {
+      variables: { url: repoUrl },
+      client: repoClient,
+      skip: !repoUrl,
+    }
+  );
+
+  const [visible, setVisible] = useState(false);
+  const wasLoaded = useRef(false);
+
+  // Flip visibility before paint so the fade-in never flickers a blank frame.
+  useLayoutEffect(() => {
+    if (data && !wasLoaded.current) {
+      wasLoaded.current = true;
+      setVisible(false);
+      requestAnimationFrame(() => setVisible(true));
+    }
+  }, [data]);
+
+  if (loading && !data) return <HeroSkeleton />;
+
+  if (error || !data) {
+    return (
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 rounded-2xl p-8 mb-6 shadow-2xl border border-slate-800">
+        <p className="text-slate-300">Unable to load repository overview.</p>
+      </div>
+    );
+  }
+
   const formatNumber = (num: number) => {
     if (num >= 1000) {
       return (num / 1000).toFixed(1) + 'k';
@@ -29,21 +77,8 @@ export default function RepositoryHero({
     return num.toString();
   };
 
-  const defaultStats = {
-    stars: 0,
-    forks: 0,
-    languages: [],
-  };
-
-  const defaultIssueCounts = {
-    totalOpen: 0,
-    assigned: 0,
-    unassigned: 0,
-    byLabel: [],
-  };
-
-  const repoStats = stats || defaultStats;
-  const counts = issueCounts || defaultIssueCounts;
+  const repoStats = data.repoInfo.stats;
+  const counts = data.repoInfo.issueCounts;
 
   // Get top 3 languages and calculate others percentage
   const top3Languages = repoStats.languages.slice(0, 3);
@@ -52,7 +87,11 @@ export default function RepositoryHero({
     .reduce((sum, lang) => sum + lang.percentage, 0);
 
   return (
-    <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 rounded-2xl p-8 mb-6 shadow-2xl border border-slate-800 cursor-hero-pointer">
+    <div
+      className={`bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 rounded-2xl p-8 mb-6 shadow-2xl border border-slate-800 cursor-hero-pointer transition-opacity duration-500 ease-out ${
+        visible ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Left Section - 65% */}
         <div className="w-full lg:w-[65%]">

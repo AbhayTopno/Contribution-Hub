@@ -50,6 +50,13 @@ class LabelCount:
 
 
 @strawberry.type
+class IssuePage:
+    issues: List[Issue]
+    total_count: int
+    has_next_page: bool
+
+
+@strawberry.type
 class RepoStats:
     stars: int
     forks: int
@@ -77,7 +84,12 @@ class RepoInfo:
         self._name = name
 
     @strawberry.field
-    def issues(self, info, issue_type: Optional[str] = None) -> List[Issue]:
+    def issues(
+        self, info,
+        issue_type: Optional[str] = None,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> IssuePage:
         raw_issues = open_issues(self._owner, self._name)
         filtered_issues = []
 
@@ -103,7 +115,14 @@ class RepoInfo:
                 assignees=assignees
             ))
 
-        return filtered_issues
+        total_count = len(filtered_issues)
+        page = filtered_issues[offset : offset + limit]
+
+        return IssuePage(
+            issues=page,
+            total_count=total_count,
+            has_next_page=offset + limit < total_count,
+        )
 
     @strawberry.field
     def contributors(
