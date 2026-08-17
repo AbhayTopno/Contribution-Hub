@@ -37,8 +37,6 @@
    Edit `.env` with your values:
 
    - `GITHUB_TOKEN`: GitHub personal access token
-   - `GOOGLE_CSE_API_KEY`: Google Custom Search Engine API key
-   - `GOOGLE_CSE_ID`: Google Custom Search Engine ID
 
    **Frontend Setup:**
 
@@ -65,10 +63,10 @@
    docker exec -it backend python manage.py fetch_gsoc_orgs
 
    # Fetch GitHub URLs
-   docker exec -it backend python manage.py fetch_github_url --limit 105
+   docker exec -it backend python manage.py fetch_github_url --limit 600
    ```
 
-   **Note:** The Google Custom Search Engine API has a daily limit of 100-105 requests. You may need to create additional API keys and CSE IDs to scrape remaining GitHub URLs if you exceed this limit.
+   **Note:** GitHub Search allows 30 authenticated requests per minute. The command processes one organization every two seconds and waits for the API reset time if the token reaches its rate limit.
 
 5. **Access the Application**
    - Frontend: `http://localhost:3000`
@@ -79,15 +77,8 @@
 ### GitHub Token
 
 1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Generate a new token with repository access permissions
+2. Generate a fine-grained token with public read access
 3. Add to your `.env` file
-
-### Google Custom Search Engine
-
-1. Visit [Google Custom Search Engine](https://cse.google.com/)
-2. Create a new search engine
-3. Get your API key from [Google Cloud Console](https://console.cloud.google.com/)
-4. Add both API key and CSE ID to your `.env` file
 
 ## Security Notes
 

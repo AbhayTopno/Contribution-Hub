@@ -3,15 +3,15 @@ import time
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from api.gsoc_api.models import Organization
-from api.gsoc_api.utils import google_items, first_github_url
+from api.gsoc_api.utils import GitHubSearchError, search_github_organization
 
-REQUEST_DELAY_SEC = 0.25
+REQUEST_DELAY_SEC = 2
 MAX_RETRIES = 3
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Fetch an organization's GitHub URL via Google Custom Search and save it."
+    help = "Fetch an organization's GitHub URL via the GitHub Search API and save it."
 
     def add_arguments(self, parser):
         parser.add_argument("--limit", type=int, help="Process only the first N organizations.")
@@ -59,6 +59,9 @@ class Command(BaseCommand):
                 failed += 1
                 self.stdout.write(self.style.ERROR(f"  • ERROR: {exc}"))
                 logger.exception("Error fetching GitHub URL for %s", org.name)
+                if isinstance(exc, GitHubSearchError) and not exc.retryable:
+                    self.stdout.write(self.style.ERROR("Stopping because GitHub Search rejected the request."))
+                    break
 
             time.sleep(REQUEST_DELAY_SEC)
 
@@ -69,11 +72,13 @@ class Command(BaseCommand):
         last_exc = None
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                items = google_items(query)
-                return first_github_url(items)
+                return search_github_organization(query.removesuffix(" GitHub"))
             except Exception as exc:
                 last_exc = exc
+                if isinstance(exc, GitHubSearchError) and not exc.retryable:
+                    raise
                 if attempt < MAX_RETRIES:
-                    time.sleep(2 * attempt)
+                    delay = exc.retry_after_seconds if isinstance(exc, GitHubSearchError) else None
+                    time.sleep(delay if delay is not None else 2 * attempt)
                     continue
-        raise last_exc or RuntimeError("Unknown Google CSE error")
+        raise last_exc or RuntimeError("Unknown GitHub Search error")
