@@ -1,30 +1,59 @@
-import urllib.parse
-from typing import List, Optional
+import time
+from typing import Optional
 import requests
 from django.conf import settings
 
-GOOGLE_API = "https://www.googleapis.com/customsearch/v1"
+GITHUB_SEARCH_API = "https://api.github.com/search/users"
 
-def google_items(query: str) -> List[dict]:
+
+class GitHubSearchError(RuntimeError):
+    def __init__(
+        self,
+        status_code: int,
+        message: str,
+        reason: str | None = None,
+        retry_after_seconds: int | None = None,
+    ):
+        self.status_code = status_code
+        self.reason = reason
+        self.retry_after_seconds = retry_after_seconds
+        detail = f" ({reason})" if reason else ""
+        super().__init__(f"GitHub Search returned HTTP {status_code}: {message}{detail}")
+
+    @property
+    def retryable(self) -> bool:
+        return self.retry_after_seconds is not None or self.status_code == 429 or self.status_code >= 500
+
+
+def search_github_organization(name: str) -> Optional[str]:
+    token = getattr(settings, "GITHUB_TOKEN", None)
+    if not token:
+        raise RuntimeError("GITHUB_TOKEN is required to search GitHub organizations.")
+
     params = {
-        "q": query,
-        "key": settings.GOOGLE_CSE_API_KEY,
-        "cx": settings.GOOGLE_CSE_ID,
-        "num": 10,
-        "siteSearch": "github.com",
-        "siteSearchFilter": "i",
+        "q": f"{name} type:org",
+        "per_page": 1,
     }
-    r = requests.get(GOOGLE_API, params=params, timeout=5)
-    r.raise_for_status()
-    return r.json().get("items", [])
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    r = requests.get(GITHUB_SEARCH_API, params=params, headers=headers, timeout=10)
+    if not r.ok:
+        try:
+            error = r.json()
+        except ValueError:
+            error = {}
 
-def first_github_url(items: List[dict]) -> Optional[str]:
-    for item in items:
-        url = item.get("link", "")
-        parsed_url = urllib.parse.urlparse(url)
-        
-        if parsed_url.netloc == "github.com":
-            path_parts = parsed_url.path.strip('/').split('/')
-            if len(path_parts) >= 1 and path_parts[0]:
-                return f"https://github.com/{path_parts[0]}"
-    return None
+        message = error.get("message") or r.reason or "Unknown GitHub Search error"
+        rate_limit_reset = r.headers.get("X-RateLimit-Reset")
+        rate_limit_exhausted = r.headers.get("X-RateLimit-Remaining") == "0"
+        retry_after_seconds = None
+        if rate_limit_reset and rate_limit_exhausted:
+            retry_after_seconds = max(1, int(rate_limit_reset) - int(time.time()))
+
+        raise GitHubSearchError(r.status_code, message, retry_after_seconds=retry_after_seconds)
+
+    items = r.json().get("items", [])
+    return items[0].get("html_url") if items else None
