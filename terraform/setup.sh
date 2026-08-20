@@ -43,7 +43,7 @@ sleep 30
 # Run commands
 docker exec backend python manage.py migrate
 docker exec backend python manage.py fetch_gsoc_orgs
-docker exec backend python manage.py fetch_github_url --limit 10
+docker exec backend python manage.py fetch_github_url --limit 600
 
 # Fix permissions for ubuntu user
 chown -R ubuntu:ubuntu /home/ubuntu/Contribution-Hub
