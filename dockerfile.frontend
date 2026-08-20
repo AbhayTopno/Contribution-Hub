@@ -1,9 +1,13 @@
 # Stage 1: Build
 FROM node:18-alpine AS builder
 ENV PNPM_HOME="/pnpm"
+#tells pnpm to install here
 ENV PATH="$PNPM_HOME:$PATH"
+#marks this path for pnpm package installations
 ENV CI=true
+#tells that it is in continous intrigation environment
 RUN corepack enable
+#manage packages npm, yarn, pnpm
 WORKDIR /app
 
 # Copy essential files first
@@ -11,6 +15,7 @@ COPY frontend/package.json frontend/pnpm-lock.yaml frontend/.env ./
 
 # Install dependencies and build
 RUN pnpm install --frozen-lockfile
+#Don't modify the lockfile during installation
 COPY frontend/ ./
 RUN pnpm build
 

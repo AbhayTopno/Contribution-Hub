@@ -25,3 +25,16 @@ venv/
 
 # Frontend (if applicable)
 node_modules/
+
+.terraform/
+.terraform.lock.hcl
+
+*.tfstate
+*.tfstate.*
+
+*.tfvars
+!*.tfvars.example
+
+*-key
+*-key.pub
+*.pem

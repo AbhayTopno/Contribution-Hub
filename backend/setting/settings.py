@@ -5,6 +5,7 @@ Django settings for setting project.
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 
 load_dotenv()  
@@ -20,6 +21,17 @@ DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "backend"]
 
+# Fetch the origin from the environment variable
+allowed_origin = os.getenv("ALLOWED_ORIGINS")
+
+if allowed_origin:
+    # Parse the URL to safely extract the hostname/IP address
+    parsed_url = urlparse(allowed_origin)
+    ip_address = parsed_url.hostname
+    
+    # Inject into ALLOWED_HOSTS if valid and not already present
+    if ip_address and ip_address not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(ip_address)
 
 # Application definition
 
@@ -114,11 +126,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_CREDENTIALS = True
 
-ALLOWED_ORIGINS = (
-        "http://127.0.0.1:3000",
-        "http://localhost:3000",
-        "http://frontend:3000",
-)
+ALLOWED_ORIGINS_ENV = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:3000,http://localhost:3000,http://frontend:3000")
+ALLOWED_ORIGINS = tuple(origin.strip() for origin in ALLOWED_ORIGINS_ENV.split(","))
 CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
 CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 

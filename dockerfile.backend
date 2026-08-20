@@ -2,12 +2,17 @@ FROM python:3.10-slim AS builder
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
+#--no-cache-dir means Normally pip may keep downloaded package files in its cache.So it prevents it
+#--user Instead of installing packages globally, pip installs them into the user's local directory
 
 FROM python:3.10-slim AS runtime
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 
+#no buffer used, generates Docker logs immediately
 ENV PATH="/root/.local/bin:${PATH}"
+#due to --user , installed packages into /root/.local
 WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 COPY backend/ ./
-EXPOSE 8000
+EXPOSE 8000 
+#EXPOSE does not publish the port to your host, makes containers communicate on port 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
